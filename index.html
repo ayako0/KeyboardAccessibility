@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessible Tabs with Tab Key Trigger</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .controls {
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        /* Standard accessible focus styling */
+        button:focus, [role="tab"]:focus, .tab-panel:focus {
+            outline: 3px solid #005a9c;
+            outline-offset: 2px;
+        }
+
+        .action-btn {
+            background-color: #005a9c;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background-color: #004475;
+        }
+
+        /* Tab Widget Container */
+        .tabs-container {
+            max-width: 600px;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Tablist layout */
+        div[role="tablist"] {
+            display: flex;
+            border-bottom: 2px solid #ccc;
+            background-color: #eee;
+        }
+
+        /* Individual Tab Buttons */
+        [role="tab"] {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            color: #555;
+            transition: background 0.2s;
+        }
+
+        [role="tab"]:hover {
+            background-color: #ddd;
+        }
+
+        /* Selected Tab State */
+        [role="tab"][aria-selected="true"] {
+            background-color: #fff;
+            color: #000;
+            border-bottom: 4px solid #005a9c;
+            margin-bottom: -2px; /* Overlap the tablist border */
+        }
+
+        /* Tab Panels */
+        .tab-panel {
+            padding: 20px;
+            min-height: 150px;
+        }
+
+        /* Utility class to hide inactive panels */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Accessible Tabs Component</h1>
+
+    <!-- 1. The HTML button acting as a Tab Key -->
+    <div class="controls">
+        <button id="trigger-tab-btn" class="action-btn">
+            Trigger Tab Key (Move Focus)
+        </button>
+    </div>
+
+    <!-- 2. The Accessible Tab Interface Widget -->
+    <div class="tabs-container">
+        <!-- Tablist container holds all tab handles -->
+        <div role="tablist" aria-label="Entertainment Options">
+            <button role="tab" aria-selected="true" aria-controls="panel-1" id="tab-1" tabindex="0">
+                Movies
+            </button>
+            <button role="tab" aria-selected="false" aria-controls="panel-2" id="tab-2" tabindex="-1">
+                Music
+            </button>
+            <button role="tab" aria-selected="false" aria-controls="panel-3" id="tab-3" tabindex="-1">
+                Books
+            </button>
+        </div>
+
+        <!-- Panels containing content for each tab -->
+        <div id="panel-1" role="tabpanel" aria-labelledby="tab-1" class="tab-panel" tabindex="0">
+            <h2>Featured Movies</h2>
+            <p>Explore the latest blockbuster releases and cinematic masterpieces.</p>
+        </div>
+
+        <div id="panel-2" role="tabpanel" aria-labelledby="tab-2" class="tab-panel hidden" tabindex="0">
+            <h2>Trending Music</h2>
+            <p>Listen to new hits and curated playlists for your daily vibe.</p>
+        </div>
+
+        <div id="panel-3" role="tabpanel" aria-labelledby="tab-3" class="tab-panel hidden" tabindex="0">
+            <h2>Top Books</h2>
+            <p>Dive into bestsellers, classic novels, and gripping mysteries.</p>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. SCRIPT FOR THE "TAB KEY" SIMULATION BUTTON ---
+        const triggerBtn = document.getElementById('trigger-tab-btn');
+
+        triggerBtn.addEventListener('click', () => {
+            // Find all elements that a user can naturally focus into
+            const focusableElements = document.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            
+            // Turn the NodeList into a normal Array
+            const elementArray = Array.from(focusableElements);
+            
+            // Find what element currently has focus on the page
+            const currentIndex = elementArray.indexOf(document.activeElement);
+            
+            // Calculate the next element in line. Wrap around to 0 if at the end.
+            const nextIndex = (currentIndex + 1) % elementArray.length;
+            
+            // Move focus to that next element programmatically
+            focusableElements[nextIndex].focus();
+        });
+
+
+        // --- 2. SCRIPT FOR ACCESSIBLE ARIA TABS ---
+        const tabList = document.querySelector('[role="tablist"]');
+        const tabs = document.querySelectorAll('[role="tab"]');
+        const panels = document.querySelectorAll('[role="tabpanel"]');
+
+        // Manage mouse clicks on tabs
+        tabList.addEventListener('click', (e) => {
+            const clickedTab = e.target.closest('[role="tab"]');
+            if (!clickedTab) return;
+            
+            switchTab(clickedTab);
+        });
+
+        // Manage Arrow Key navigation for accessibility
+        tabList.addEventListener('keydown', (e) => {
+            const tabsArray = Array.from(tabs);
+            let currentIdx = tabsArray.indexOf(document.activeElement);
+            
+            if (currentIdx === -1) return;
+
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                let nextIdx = (currentIdx + 1) % tabsArray.length;
+                tabsArray[nextIdx].focus();
+                switchTab(tabsArray[nextIdx]);
+            } 
+            else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                let prevIdx = (currentIdx - 1 + tabsArray.length) % tabsArray.length;
+                tabsArray[prevIdx].focus();
+                switchTab(tabsArray[prevIdx]);
+            }
+        });
+
+        // Function to safely swap tabs and hide/show content panels
+        function switchTab(targetTab) {
+            // 1. Deactivate all tabs and hide panels
+            tabs.forEach(tab => {
+                tab.setAttribute('aria-selected', 'false');
+                tab.setAttribute('tabindex', '-1');
+            });
+            panels.forEach(panel => panel.classList.add('hidden'));
+
+            // 2. Activate the target tab
+            targetTab.setAttribute('aria-selected', 'true');
+            targetTab.setAttribute('tabindex', '0');
+
+            // 3. Reveal the target panel
+            const targetPanelId = targetTab.getAttribute('aria-controls');
+            document.getElementById(targetPanelId).classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
