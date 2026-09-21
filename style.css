@@ -1,1 +1,87 @@
+body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f0f2f5;
+}
 
+/* Grid Layout */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    gap: 15px;
+    margin-bottom: 40px;
+}
+
+.nav-item {
+    width: 100px;
+    height: 100px;
+    background-color: #ffffff;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Highlighted Focus State */
+.nav-item:focus {
+    outline: none;
+    background-color: #007bff;
+    color: white;
+    border-color: #0056b3;
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+}
+
+/* Mobile D-Pad Controller */
+.dpad-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.dpad-row {
+    display: flex;
+    gap: 45px; /* Creates space for the invisible center */
+    position: relative;
+}
+
+.dpad-btn {
+    width: 50px;
+    height: 50px;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.dpad-btn:active {
+    background-color: #555;
+}
+
+.dpad-center {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    left: 55px;
+    top: 5px;
+}
+
+/* Hide D-Pad on Desktop screens */
+@media (min-width: 768px) {
+    .dpad-container {
+        display: none;
+    }
+}
